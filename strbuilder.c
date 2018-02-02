@@ -12,4 +12,5 @@ char* sb_tostring(strbuilder* sb) {
   }
 
   char* result = calloc(result_size, sizeof(char));
+  
 }
