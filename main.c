@@ -1,5 +1,6 @@
 #include "sys_headers.h"
 
+#include "bytestr.h"
 #include "p6_data.h"
 #include "strbuilder.h"
 
@@ -40,7 +41,7 @@ void free_p6_data(p6_data data) {
   free(data.pixels);
 }
 
-char* get_p6_content(p6_data data) {
+bytestr get_p6_content(p6_data data) {
   char width_str[25];
   char height_str[25];
   char maxval_str[25];
@@ -68,14 +69,14 @@ char* get_p6_content(p6_data data) {
     }
   }
 
-  return sb_tostring(sb);
+  return sb_tostring_and_free(sb);
 }
 
 void write_p6_to_file(const char* path, p6_data data) {
   int fd = open(path, O_CREAT | O_WRONLY);
-  char* content = get_p6_content(data);
-  write(fd, content, sizeof(content));
-  free(content);
+  bytestr content = get_p6_content(data);
+  write(fd, content.data, content.data_size);
+  free(content.data);
   close(fd);
 }
 

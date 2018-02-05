@@ -21,10 +21,10 @@ BIN:=$(MKF_DIR)/bin
 OBJ:=$(MKF_DIR)/obj
 SRC:=$(MKF_DIR)
 
-HEADERS:=p6_data.h pixel.h strbuilder.h
+HEADERS:=bytestr.h p6_data.h pixel.h strbuilder.h sys_headers.h
 H_PATHS:=$(HEADERS:%=$(SRC)/%)
 
-SOURCES:=main.c strbuilder.c
+SOURCES:=bytestr.c main.c strbuilder.c
 S_PATHS:=$(SOURCES:%=$(SRC)/%)
 
 OBJECTS:=$(SOURCES:.c=.o)
