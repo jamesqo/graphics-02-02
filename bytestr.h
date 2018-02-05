@@ -4,7 +4,7 @@
 #include "sys_headers.h"
 
 typedef struct {
-  uint8_t* data;
+  void* data;
   size_t data_size;
 } bytestr;
 

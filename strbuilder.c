@@ -53,12 +53,12 @@ bytestr sb_tostring(strbuilder* sb) {
     result.data_size += sb->appended_strs[i].data_size;
   }
 
-  result.data = calloc(result.data_size, sizeof(uint8_t));
+  result.data = calloc(result.data_size, 1);
 
-  uint8_t* dest_ptr = result.data;
+  void* dest_ptr = result.data;
   for (size_t i = 0; i < sb->num_appends; i++) {
     bytestr src = sb->appended_strs[i];
-    memcpy(dest_ptr, src.data, src.data_size * sizeof(uint8_t));
+    memcpy(dest_ptr, src.data, src.data_size * 1);
     dest_ptr += src.data_size;
   }
 
