@@ -8,6 +8,13 @@
 #define IMAGE_HEIGHT 1000
 #define P6_MAXVAL 255
 
+void check_error(int retval) {
+  if (retval == -1) {
+    fprintf(stderr, "System call failed: %s\n", strerror(errno));
+    exit(1);
+  }
+}
+
 pixel get_pixel(size_t row, size_t column) {
   pixel p;
   p.red = (uint8_t)row; // Casting to smaller unsigned type: Well-defined
@@ -74,6 +81,8 @@ bytestr get_p6_content(p6_data data) {
 
 void write_p6_to_file(const char* path, p6_data data) {
   int fd = open(path, O_CREAT | O_WRONLY);
+  check_error(fd);
+
   bytestr content = get_p6_content(data);
   write(fd, content.data, content.data_size);
   free(content.data);
@@ -81,7 +90,7 @@ void write_p6_to_file(const char* path, p6_data data) {
 }
 
 int main() {
-  const char destfile[] = "output.ppm";
+  const char destfile[] = "output2.ppm";
 
   p6_data data = get_p6_data();
   write_p6_to_file(destfile, data);

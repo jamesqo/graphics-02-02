@@ -5,17 +5,28 @@
 #define SB_INIT_CAPACITY 4
 #define SB_GROWTH_FACTOR 2
 
+void sb_resize_(strbuilder*);
+void sb_add_entry_(strbuilder*, sb_entry);
+
+void sb_add_entry_(strbuilder* sb, sb_entry entry) {
+  if (sb->num_appends == sb->capacity) {
+    sb_resize_(sb);
+  }
+  sb->entries[sb->num_appends] = entry;
+  sb->num_appends++;
+}
+
 void sb_resize_(strbuilder* sb) {
   assert(sb->num_appends == sb->capacity);
 
   sb->capacity *= SB_GROWTH_FACTOR;
-  sb->appended_strs = realloc(sb->appended_strs, sb->capacity * sizeof(bytestr));
+  sb->entries = realloc(sb->entries, sb->capacity * sizeof(sb_entry));
 }
 
 strbuilder* sb_get() {
   strbuilder* sb = calloc(1, sizeof(strbuilder));
   sb->capacity = SB_INIT_CAPACITY;
-  sb->appended_strs = calloc(sb->capacity, sizeof(bytestr));
+  sb->entries = calloc(sb->capacity, sizeof(sb_entry));
   sb->num_appends = 0;
   return sb;
 }
@@ -26,19 +37,23 @@ void sb_append(strbuilder* sb, char* str) {
 }
 
 void sb_appendbyte(strbuilder* sb, uint8_t byte) {
-  bytestr bstr;
-  bstr.data = &byte;
-  bstr.data_size = 1;
+  sb_entry entry;
+  memset(&entry, 0, sizeof(entry));
 
-  sb_appendbytes(sb, bstr);
+  entry.is_byte = true;
+  entry.byte = byte;
+
+  sb_add_entry_(sb, entry);
 }
 
 void sb_appendbytes(strbuilder* sb, bytestr bstr) {
-  if (sb->num_appends == sb->capacity) {
-    sb_resize_(sb);
-  }
-  sb->appended_strs[sb->num_appends] = bstr;
-  sb->num_appends++;
+  sb_entry entry;
+  memset(&entry, 0, sizeof(entry));
+
+  entry.is_byte = false;
+  entry.bstr = bstr;
+
+  sb_add_entry_(sb, entry);
 }
 
 void sb_appendline(strbuilder* sb) {
@@ -50,23 +65,30 @@ bytestr sb_tostring(strbuilder* sb) {
   memset(&result, 0, sizeof(result));
 
   for (size_t i = 0; i < sb->num_appends; i++) {
-    result.data_size += sb->appended_strs[i].data_size;
+    sb_entry entry = sb->entries[i];
+    result.data_size += (entry.is_byte ? 1 : entry.bstr.data_size);
   }
 
   result.data = calloc(result.data_size, 1);
 
   void* dest_ptr = result.data;
   for (size_t i = 0; i < sb->num_appends; i++) {
-    bytestr src = sb->appended_strs[i];
-    memcpy(dest_ptr, src.data, src.data_size * 1);
-    dest_ptr += src.data_size;
+    sb_entry entry = sb->entries[i];
+    if (entry.is_byte) {
+      memcpy(dest_ptr, &entry.byte, sizeof(uint8_t));
+      dest_ptr += 1;
+    } else {
+      bytestr src = entry.bstr;
+      memcpy(dest_ptr, src.data, src.data_size * 1);
+      dest_ptr += src.data_size;
+    }
   }
 
   return result;
 }
 
 void sb_free(strbuilder* sb) {
-  free(sb->appended_strs);
+  free(sb->entries);
   free(sb);
 }
 

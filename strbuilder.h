@@ -6,7 +6,13 @@
 #include "bytestr.h"
 
 typedef struct {
-  bytestr* appended_strs;
+  bool is_byte;
+  uint8_t byte;
+  bytestr bstr;
+} sb_entry;
+
+typedef struct {
+  sb_entry* entries;
   size_t capacity;
   size_t num_appends;
 } strbuilder;
