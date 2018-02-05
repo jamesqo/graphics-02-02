@@ -37,9 +37,12 @@ ifeq ($(OS),Windows_NT)
 	OUTPUT:=$(OUTPUT).exe
 endif
 
-.PHONY: all print-%
+.PHONY: all clean print-%
 
 all: $(OUTPUT)
+
+clean:
+	rm -rf $(BIN) $(OBJ)
 
 # useful for debugging
 # usage: print-VARNAME
